@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../models/item.dart';
+import '../blocs/item/bloc.dart';
 import '../constants/app_colors.dart';
 
 class ItemList extends StatelessWidget {

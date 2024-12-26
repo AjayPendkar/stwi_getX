@@ -1,70 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/item/bloc.dart';
 
-class AddItemForm extends StatefulWidget {
-  final Function(String name, String description) onAdd;
-
-  const AddItemForm({super.key, required this.onAdd});
-
-  @override
-  State<AddItemForm> createState() => _AddItemFormState();
-}
-
-class _AddItemFormState extends State<AddItemForm> {
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      widget.onAdd(_nameController.text, _descriptionController.text);
-      _nameController.clear();
-      _descriptionController.clear();
-    }
-  }
+class AddItemForm extends StatelessWidget {
+  const AddItemForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              border: OutlineInputBorder(),
+    final formKey = GlobalKey<FormState>();
+    String name = '';
+    String description = '';
+
+    return AlertDialog(
+      title: const Text('Add New Item'),
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  hintText: 'Enter item name',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  name = value ?? '';
+                },
+              ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a name';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              border: OutlineInputBorder(),
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                hintText: 'Enter item description',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+              onSaved: (value) {
+                description = value ?? '';
+              },
             ),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _submitForm,
-            child: const Text('Add Item'),
-          ),
-        ],
+          ],
+        ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (formKey.currentState?.validate() ?? false) {
+              formKey.currentState?.save();
+              context.read<ItemBloc>().add(AddItem(name, description));
+              Navigator.pop(context);
+            }
+          },
+          child: const Text('Add'),
+        ),
+      ],
     );
   }
 } 
